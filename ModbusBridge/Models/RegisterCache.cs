@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace ModbusBridge.Models;
 
@@ -16,6 +17,19 @@ public sealed class RegisterCache
     public ModbusRegisterValue? Get(ModbusReadRequest request)
     {
         return _values.TryGetValue(BuildKey(request), out var value) ? value : null;
+    }
+
+    public void SetError(ModbusReadRequest request, RegisterQuality quality, string errorMessage)
+    {
+        var current = Get(request);
+        Set(new ModbusRegisterValue
+        {
+            Request = request,
+            Value = current?.Value ?? 0,
+            Quality = quality,
+            Timestamp = DateTime.Now,
+            ErrorMessage = errorMessage
+        });
     }
 
     public IReadOnlyList<ModbusRegisterValue> GetSnapshot()

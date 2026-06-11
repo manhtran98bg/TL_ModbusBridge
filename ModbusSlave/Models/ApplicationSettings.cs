@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ModbusBridge.Models;
+namespace ModbusSlave.Models;
 
 public sealed class ApplicationSettings
 {

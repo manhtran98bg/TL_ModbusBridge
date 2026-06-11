@@ -13,6 +13,7 @@ public sealed class PlcService : IPlcService
     private readonly PlcWriteWorker _writeWorker;
     private WorkerStatus _status = new()
     {
+        Kind = WorkerKind.Plc,
         Name = "PLC",
         State = WorkerState.Stopped,
         Message = "PLC writer stopped."
@@ -32,6 +33,7 @@ public sealed class PlcService : IPlcService
         Logger.Log($"[PLC] Writer skeleton started for {_settings.CpuType} {_settings.IpAddress}:{_settings.Port}.");
         _status = new WorkerStatus
         {
+            Kind = WorkerKind.Plc,
             Name = "PLC",
             State = WorkerState.Running,
             Message = "PLC writer ready. S7 write logic is not implemented yet."
@@ -45,6 +47,7 @@ public sealed class PlcService : IPlcService
         await _writeWorker.StopAsync(cancellationToken);
         _status = new WorkerStatus
         {
+            Kind = WorkerKind.Plc,
             Name = "PLC",
             State = WorkerState.Stopped,
             Message = "PLC writer stopped."

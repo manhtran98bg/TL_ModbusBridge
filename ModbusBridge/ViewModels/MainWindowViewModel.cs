@@ -1,7 +1,11 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Options;
 using ModbusBridge.Models;
 using ModbusBridge.Services;
 
@@ -11,6 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly IBridgeService? _bridgeService;
     private readonly IStatisticsService? _statisticsService;
+    private readonly DispatcherTimer? _refreshTimer;
 
     [ObservableProperty] private string _title = "Hitachi Modbus Bridge";
     [ObservableProperty] private string _statusMessage = "Stopped";
@@ -19,16 +24,29 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private long _plcWriteCount;
     [ObservableProperty] private long _plcErrorCount;
 
+    public ObservableCollection<ChannelStatusViewModel> ChannelStatuses { get; } = [];
+
     public MainWindowViewModel()
     {
     }
 
-    public MainWindowViewModel(IBridgeService bridgeService, IStatisticsService statisticsService)
+    public MainWindowViewModel(
+        IBridgeService bridgeService,
+        IStatisticsService statisticsService,
+        IOptionsMonitor<ApplicationSettings> options)
     {
         _bridgeService = bridgeService;
         _statisticsService = statisticsService;
         _bridgeService.StatusChanged += OnBridgeStatusChanged;
         RefreshSnapshot();
+
+        var refreshIntervalMs = Math.Max(100, options.CurrentValue.Ui.RefreshIntervalMs);
+        _refreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(refreshIntervalMs)
+        };
+        _refreshTimer.Tick += (_, _) => RefreshSnapshot();
+        _refreshTimer.Start();
     }
 
     [RelayCommand]
@@ -63,16 +81,49 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        BridgeStatistics statistics = _statisticsService.GetSnapshot();
+        BridgeSnapshot snapshot = _bridgeService?.GetSnapshot()
+            ?? new BridgeSnapshot { Statistics = _statisticsService.GetSnapshot() };
+        BridgeStatistics statistics = snapshot.Statistics;
         ModbusRequestCount = statistics.ModbusRequestCount;
         ModbusErrorCount = statistics.ModbusErrorCount;
         PlcWriteCount = statistics.PlcWriteCount;
         PlcErrorCount = statistics.PlcErrorCount;
+        UpdateChannelStatuses(snapshot);
     }
 
     private void OnBridgeStatusChanged(object? sender, BridgeStatusChangedEventArgs e)
     {
-        StatusMessage = e.Message;
-        RefreshSnapshot();
+        Dispatcher.UIThread.Post(() =>
+        {
+            StatusMessage = e.Message;
+            RefreshSnapshot();
+        });
+    }
+
+    private void UpdateChannelStatuses(BridgeSnapshot snapshot)
+    {
+        var modbusWorkers = snapshot.Workers
+            .Where(worker => worker.Kind == WorkerKind.Modbus)
+            .OrderBy(worker => worker.Name)
+            .ToArray();
+
+        foreach (var removed in ChannelStatuses
+                     .Where(item => modbusWorkers.All(worker => worker.Name != item.Name))
+                     .ToArray())
+        {
+            ChannelStatuses.Remove(removed);
+        }
+
+        foreach (var worker in modbusWorkers)
+        {
+            var item = ChannelStatuses.FirstOrDefault(channel => channel.Name == worker.Name);
+            if (item is null)
+            {
+                item = new ChannelStatusViewModel();
+                ChannelStatuses.Add(item);
+            }
+
+            item.Update(worker);
+        }
     }
 }

@@ -1,19 +1,19 @@
-using System;
-using System.IO;
 using System.Text.Json;
-using ModbusBridge.Models;
+using ModbusSlave.Models;
 
-namespace ModbusBridge.Utilities;
+namespace ModbusSlave.Utilities;
 
 public static class AppStoragePaths
 {
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
-        WriteIndented = true
+        WriteIndented = true,
+        PropertyNameCaseInsensitive = true
     };
 
     public const string AppDirectoryName = ".modbus_bridge";
-    public const string ConfigFileName = "config.json";
+    public const string BridgeConfigFileName = "config.json";
+    public const string ConfigFileName = "slave_config.json";
 
     public static string RootDirectory
     {
@@ -26,66 +26,59 @@ public static class AppStoragePaths
         }
     }
 
-    public static string DataDirectory
-    {
-        get
-        {
-            var directory = Path.Combine(RootDirectory, "Data");
-            Directory.CreateDirectory(directory);
-            return directory;
-        }
-    }
-
-    public static string LogDirectory
-    {
-        get
-        {
-            var directory = Path.Combine(RootDirectory, "Logs");
-            Directory.CreateDirectory(directory);
-            return directory;
-        }
-    }
-
+    public static string BridgeSettingsPath => Path.Combine(RootDirectory, BridgeConfigFileName);
     public static string SettingsPath => Path.Combine(RootDirectory, ConfigFileName);
 
     public static void EnsureConfigFile()
     {
-        Directory.CreateDirectory(RootDirectory);
-
         if (File.Exists(SettingsPath))
         {
-            Logger.Log($"[CONFIG] Loaded config path: {SettingsPath}");
+            Logger.Log($"[CONFIG] Slave config: {SettingsPath}");
             return;
         }
 
-        var defaultConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
-        if (File.Exists(defaultConfigPath))
+        var settings = File.Exists(BridgeSettingsPath)
+            ? LoadSettings(BridgeSettingsPath)
+            : CreateDefaultSettings();
+
+        ApplyDefaultSlavePorts(settings);
+        File.WriteAllText(SettingsPath, JsonSerializer.Serialize(settings, SerializerOptions));
+        Logger.Log($"[CONFIG] Created slave config: {SettingsPath}");
+    }
+
+    private static ApplicationSettings LoadSettings(string path)
+    {
+        var json = File.ReadAllText(path);
+        return JsonSerializer.Deserialize<ApplicationSettings>(json, SerializerOptions)
+            ?? CreateDefaultSettings();
+    }
+
+    private static void ApplyDefaultSlavePorts(ApplicationSettings settings)
+    {
+        foreach (var channel in settings.Modbus.Channels)
         {
-            File.Copy(defaultConfigPath, SettingsPath);
-            Logger.Log($"[CONFIG] Created default config from appsettings.json: {SettingsPath}");
-            return;
+            channel.PortName = CreateDefaultSlavePort(channel.PortName);
+        }
+    }
+
+    private static string CreateDefaultSlavePort(string sourcePortName)
+    {
+        const string comPrefix = "COM";
+
+        if (sourcePortName.StartsWith(comPrefix, StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(sourcePortName[comPrefix.Length..], out var portNumber))
+        {
+            return $"{comPrefix}{portNumber + 100}";
         }
 
-        var json = JsonSerializer.Serialize(CreateDefaultSettings(), SerializerOptions);
-        File.WriteAllText(SettingsPath, json);
-        Logger.Log($"[CONFIG] Created default config: {SettingsPath}");
+        return sourcePortName;
     }
 
     private static ApplicationSettings CreateDefaultSettings()
     {
         return new ApplicationSettings
         {
-            Siemens = new SiemensSettings
-            {
-                IpAddress = "192.168.1.10",
-                CpuType = "S71200",
-                Port = 102,
-                Rack = 0,
-                Slot = 1,
-                WriteIntervalMs = 100,
-                AutoReconnect = true
-            },
-            Modbus = new ModbusSettings
+            Modbus =
             {
                 BaudRate = 38400,
                 Parity = "Even",
@@ -106,7 +99,7 @@ public static class AppStoragePaths
                     {
                         Enable = true,
                         Name = "COM1",
-                        PortName = "COM1",
+                        PortName = "COM101",
                         FirstSlaveId = 1,
                         LastSlaveId = 34,
                         PlcMemoryStart = 3000
@@ -115,7 +108,7 @@ public static class AppStoragePaths
                     {
                         Enable = true,
                         Name = "COM2",
-                        PortName = "COM2",
+                        PortName = "COM102",
                         FirstSlaveId = 35,
                         LastSlaveId = 58,
                         PlcMemoryStart = 4000
@@ -124,16 +117,12 @@ public static class AppStoragePaths
                     {
                         Enable = true,
                         Name = "COM3",
-                        PortName = "COM3",
+                        PortName = "COM103",
                         FirstSlaveId = 59,
                         LastSlaveId = 74,
                         PlcMemoryStart = 5000
                     }
                 ]
-            },
-            Ui = new UiSettings
-            {
-                RefreshIntervalMs = 500
             }
         };
     }

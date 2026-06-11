@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ModbusBridge.Models;
 
@@ -19,6 +20,16 @@ public sealed class ModbusReadRequest
     public ushort ProtocolAddress { get; init; }
     public int RegisterIndex { get; init; }
     public int PlcMemoryAddress { get; init; }
+}
+
+public sealed class ModbusReadBatch
+{
+    public string ChannelName { get; init; } = string.Empty;
+    public string PortName { get; init; } = string.Empty;
+    public byte SlaveId { get; init; }
+    public ushort StartAddress { get; init; }
+    public ushort Quantity { get; init; }
+    public IReadOnlyList<ModbusReadRequest> Requests { get; init; } = [];
 }
 
 public sealed class ModbusRegisterValue
