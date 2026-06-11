@@ -25,7 +25,7 @@ sealed class Program
         }
         catch (Exception exception)
         {
-            CrashLogService.LogException(exception, "Program.Main");
+            Logger.LogCrashException(exception, "Program.Main");
             throw;
         }
     }
@@ -40,12 +40,12 @@ sealed class Program
     {
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
-            CrashLogService.LogException(e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
+            Logger.LogCrashException(e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
         };
 
         TaskScheduler.UnobservedTaskException += (_, e) =>
         {
-            CrashLogService.LogException(e.Exception, "TaskScheduler.UnobservedTaskException");
+            Logger.LogCrashException(e.Exception, "TaskScheduler.UnobservedTaskException");
             e.SetObserved();
         };
     }

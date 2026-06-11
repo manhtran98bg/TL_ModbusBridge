@@ -36,6 +36,7 @@ public sealed class ModbusSettings
 
 public sealed class ModbusChannelSettings
 {
+    public bool Enable { get; set; } = true;
     public string Name { get; set; } = string.Empty;
     public string PortName { get; set; } = string.Empty;
     public byte FirstSlaveId { get; set; }

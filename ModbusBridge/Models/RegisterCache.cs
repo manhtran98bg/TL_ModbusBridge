@@ -1,9 +1,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using ModbusBridge.Models;
 
-namespace ModbusBridge.Services;
+namespace ModbusBridge.Models;
 
 public sealed class RegisterCache
 {

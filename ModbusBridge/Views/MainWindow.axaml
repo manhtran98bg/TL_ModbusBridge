@@ -3,16 +3,18 @@
         xmlns:vm="using:ModbusBridge.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="480"
+        Width="640" Height="480"
         x:Class="ModbusBridge.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
+       
         Title="ModbusBridge">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
+    
     <Grid RowDefinitions="Auto,Auto,*" Margin="20">
         <StackPanel Grid.Row="0" Spacing="4">
             <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold"/>

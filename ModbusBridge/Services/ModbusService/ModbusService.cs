@@ -18,6 +18,7 @@ public sealed class ModbusService : IModbusService
     {
         var settings = options.CurrentValue;
         _workers = settings.Modbus.Channels
+            .Where(channel => channel.Enable)
             .Select(channel => new ModbusChannelWorker(channel, settings.Modbus, registerCache, statisticsService))
             .ToList();
     }

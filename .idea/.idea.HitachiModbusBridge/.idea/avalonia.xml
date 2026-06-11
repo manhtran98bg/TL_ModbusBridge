@@ -3,6 +3,7 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="ModbusBridge/App.axaml" value="ModbusBridge/ModbusBridge.csproj" />
         <entry key="ModbusBridge/Views/MainWindow.axaml" value="ModbusBridge/ModbusBridge.csproj" />
       </map>
     </option>

@@ -69,7 +69,7 @@ public partial class App : Application
 
     private static IConfiguration BuildConfiguration()
     {
-        ConfigBootstrapper.EnsureConfigFile();
+        AppStoragePaths.EnsureConfigFile();
 
         return new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
