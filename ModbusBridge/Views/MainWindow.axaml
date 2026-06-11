@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModbusBridge.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="ModbusBridge.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="ModbusBridge">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="20">
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding StatusMessage}" Opacity="0.75"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,16,0,16">
+            <Button Content="Start" Command="{Binding StartCommand}"/>
+            <Button Content="Stop" Command="{Binding StopCommand}"/>
+            <Button Content="Refresh" Command="{Binding RefreshSnapshotCommand}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Modbus requests"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Margin="16,0,0,0" Text="{Binding ModbusRequestCount}"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" Text="Modbus errors"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Margin="16,8,0,0" Text="{Binding ModbusErrorCount}"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,8,0,0" Text="PLC writes"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Margin="16,8,0,0" Text="{Binding PlcWriteCount}"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,8,0,0" Text="PLC errors"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Margin="16,8,0,0" Text="{Binding PlcErrorCount}"/>
+        </Grid>
+    </Grid>
+</Window>
