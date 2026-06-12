@@ -45,8 +45,8 @@ public sealed class WorkerStatus
     public DateTime LastSuccessTimestamp { get; init; } = DateTime.MinValue;
     public DateTime LastErrorTimestamp { get; init; } = DateTime.MinValue;
     public byte LastSlaveId { get; init; }
-    public ushort LastStartAddress { get; init; }
-    public ushort LastQuantity { get; init; }
+    public int LastStartAddress { get; init; }
+    public int LastQuantity { get; init; }
 }
 
 public sealed class BridgeStatistics

@@ -62,6 +62,7 @@ public partial class App : Application
         services.AddSingleton<IPlcService, PlcService>();
         services.AddSingleton<IBridgeService, BridgeService>();
         services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<SettingsViewModel>();
 
         _serviceProvider = services.BuildServiceProvider();
         return _serviceProvider;

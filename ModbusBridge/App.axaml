@@ -10,6 +10,7 @@
     </Application.DataTemplates>
   
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme DensityStyle="Compact"/>
+        <StyleInclude Source="Styles/GControlStyles.axaml"/>
     </Application.Styles>
 </Application>

@@ -82,7 +82,7 @@ public static class AppStoragePaths
                 Port = 102,
                 Rack = 0,
                 Slot = 1,
-                WriteIntervalMs = 100,
+                WriteIntervalMs = 1000,
                 AutoReconnect = true
             },
             Modbus = new ModbusSettings

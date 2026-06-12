@@ -1,0 +1,170 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModbusBridge.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="920" d:DesignHeight="660"
+        Width="920" Height="660"
+        MinWidth="860" MinHeight="620"
+        x:Class="ModbusBridge.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        RequestedThemeVariant="Light"
+        WindowStartupLocation="CenterOwner"
+        Title="Settings">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="TextBlock.section-title">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="Black"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+        </Style>
+
+        <Style Selector="TextBlock.field-label">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <Style Selector="Border.settings-panel">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BoxShadow" Value="0 4 15 0 #1A000000"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto" Background="#F8FAFC" Margin="12">
+        <Border Grid.Row="0" Height="96" Background="#E2E8F0" CornerRadius="15" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="Auto,*" Margin="20,0">
+                <Border Width="62" Height="62" Background="#0F172A" CornerRadius="18" VerticalAlignment="Center">
+                    <TextBlock Text="M" FontSize="28" FontWeight="Black" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" Margin="18,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="MODBUS BRIDGE SETTINGS" FontSize="28" FontWeight="Black" Foreground="#0F172A"/>
+                    <TextBlock Text="PLC Siemens and Modbus RTU channel configuration"
+                               FontSize="15" FontWeight="SemiBold" Foreground="#475569"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="14">
+                <Border Classes="settings-panel">
+                    <StackPanel Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Classes="section-title" Text="PLC CONNECTION" VerticalAlignment="Center"/>
+                            <Border Grid.Column="1" Background="#DBEAFE" CornerRadius="14" Padding="12,5" VerticalAlignment="Center">
+                                <TextBlock Text="SIEMENS TCP/IP" FontSize="12" FontWeight="Bold" Foreground="#1D4ED8"/>
+                            </Border>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="2*,*,*,*">
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                <TextBlock Classes="field-label" Text="IP address"/>
+                                <TextBox Text="{Binding IpAddress}" CornerRadius="15"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                <TextBlock Classes="field-label" Text="Port"/>
+                                <TextBox Text="{Binding Port}" CornerRadius="15"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                                <TextBlock Classes="field-label" Text="Rack"/>
+                                <NumericUpDown Minimum="0" Maximum="10" Increment="1" Value="{Binding Rack}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="3">
+                                <TextBlock Classes="field-label" Text="Slot"/>
+                                <NumericUpDown Minimum="0" Maximum="10" Increment="1" Value="{Binding Slot}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="settings-panel">
+                    <StackPanel Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Classes="section-title" Text="MODBUS RTU" VerticalAlignment="Center"/>
+                            <Border Grid.Column="1" Background="#DBEAFE" CornerRadius="14" Padding="12,5" VerticalAlignment="Center">
+                                <TextBlock Text="SERIAL" FontSize="12" FontWeight="Bold" Foreground="#1D4ED8"/>
+                            </Border>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*,*,*">
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                <TextBlock Classes="field-label" Text="Baudrate"/>
+                                <NumericUpDown Minimum="1200" Maximum="921600" Increment="1200" Value="{Binding BaudRate}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                <TextBlock Classes="field-label" Text="Parity"/>
+                                <ComboBox ItemsSource="{Binding ParityOptions}" SelectedItem="{Binding Parity}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                                <TextBlock Classes="field-label" Text="Data bits"/>
+                                <NumericUpDown Minimum="5" Maximum="8" Increment="1" Value="{Binding DataBits}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="3">
+                                <TextBlock Classes="field-label" Text="Stop bits"/>
+                                <ComboBox ItemsSource="{Binding StopBitsOptions}" SelectedItem="{Binding StopBits}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="settings-panel">
+                    <StackPanel Spacing="14">
+                        <TextBlock Classes="section-title" Text="CHANNELS"/>
+
+                        <Grid ColumnDefinitions="70,*,0.5*" Margin="0,0,0,4">
+                            <TextBlock Grid.Column="0" Classes="field-label" Text="Enable"/>
+                            <TextBlock Grid.Column="1" Classes="field-label" Text="Name"/>
+                            <TextBlock Grid.Column="2" Classes="field-label" Text="COM port"/>
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{Binding Channels}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SettingsChannelViewModel">
+                                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="70,*,0.5*">
+                                            <CheckBox Grid.Column="0" IsChecked="{Binding Enable}" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Text="{Binding Name}" Margin="0,0,10,0" IsReadOnly="True"/>
+                                            <TextBox Grid.Column="2" Text="{Binding PortName}" Margin="0,0,10,0"/>
+                                            <!--<NumericUpDown Grid.Column="3" Minimum="1" Maximum="247" Increment="1" Value="{Binding FirstSlaveId}" Margin="0,0,10,0"/>
+                                            <NumericUpDown Grid.Column="4" Minimum="1" Maximum="247" Increment="1" Value="{Binding LastSlaveId}" Margin="0,0,10,0"/>
+                                            <NumericUpDown Grid.Column="5" Minimum="0" Maximum="200000" Increment="4" Value="{Binding PlcMemoryStart}"/>-->
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="#E2E8F0" CornerRadius="12" Margin="0,10,0,0" Padding="16">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" VerticalAlignment="Center"
+                           FontSize="14" FontWeight="SemiBold" Foreground="#334155"/>
+                <Button Grid.Column="1" Content="Cancel" Command="{Binding CancelCommand}" Classes="small" 
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                        Width="120" Height="42" Margin="0,0,10,0" Background="#FFFFFF" Foreground="#475569"/>
+                <Button Grid.Column="2" Content="Save" Command="{Binding SaveCommand}" Classes="small"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                        Width="120" Height="42"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

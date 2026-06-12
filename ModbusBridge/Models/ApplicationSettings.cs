@@ -16,7 +16,7 @@ public sealed class SiemensSettings
     public int Port { get; set; } = 102;
     public int Rack { get; set; }
     public int Slot { get; set; } = 1;
-    public int WriteIntervalMs { get; set; } = 100;
+    public int WriteIntervalMs { get; set; } = 1000;
     public bool AutoReconnect { get; set; } = true;
 }
 

@@ -3,8 +3,9 @@
         xmlns:vm="using:ModbusBridge.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="920" d:DesignHeight="560"
-        Width="920" Height="560"
+        mc:Ignorable="d" d:DesignWidth="1040" d:DesignHeight="680"
+        Width="1040" Height="680"
+        MinWidth="900" MinHeight="600"
         x:Class="ModbusBridge.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -14,69 +15,144 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="20">
-        <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold"/>
-            <TextBlock Text="{Binding StatusMessage}" Opacity="0.75"/>
-        </StackPanel>
+    <Window.Styles>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BoxShadow" Value="0 4 15 0 #1A000000"/>
+        </Style>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,16,0,16">
-            <Button Content="Start" Command="{Binding StartCommand}"/>
-            <Button Content="Stop" Command="{Binding StopCommand}"/>
-        </StackPanel>
+        <Style Selector="Border.stat-card">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="BoxShadow" Value="0 4 10 0 #15000000"/>
+        </Style>
 
-        <Border Grid.Row="2" BorderBrush="#D5D9E0" BorderThickness="1" Padding="12" Margin="0,0,0,16">
-            <Grid ColumnDefinitions="*,*,*,*">
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Modbus requests" Opacity="0.7"/>
-                    <TextBlock Text="{Binding ModbusRequestCount}" FontSize="18" FontWeight="SemiBold"/>
+        <Style Selector="Border.worker-card">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="BoxShadow" Value="0 1 3 0 #10000000"/>
+        </Style>
+
+        <Style Selector="TextBlock.metric-label">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+        </Style>
+
+        <Style Selector="TextBlock.metric-value">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+
+        <Style Selector="TextBlock.muted">
+            <Setter Property="Foreground" Value="#64748B"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*" Background="#F8FAFC" Margin="20">
+        <Border Grid.Row="0" Background="#E2E8F0" CornerRadius="15" Padding="18">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{Binding Title}" FontSize="28" FontWeight="Black" Foreground="#0F172A"/>
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="15" FontWeight="SemiBold" Foreground="#475569"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Modbus errors" Opacity="0.7"/>
-                    <TextBlock Text="{Binding ModbusErrorCount}" FontSize="18" FontWeight="SemiBold"/>
-                </StackPanel>
-
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="PLC writes" Opacity="0.7"/>
-                    <TextBlock Text="{Binding PlcWriteCount}" FontSize="18" FontWeight="SemiBold"/>
-                </StackPanel>
-
-                <StackPanel Grid.Column="3">
-                    <TextBlock Text="PLC errors" Opacity="0.7"/>
-                    <TextBlock Text="{Binding PlcErrorCount}" FontSize="18" FontWeight="SemiBold"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Content="Start" Command="{Binding StartCommand}" Classes="small" MinWidth="96"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <Button Content="Stop" Command="{Binding StopCommand}" Classes="small" MinWidth="96" 
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Background="#FFFFFF" Foreground="#475569"/>
+                    <Button Content="Settings" Command="{Binding OpenSettingsCommand}" Classes="small" MinWidth="112"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="3">
-            <ItemsControl ItemsSource="{Binding ChannelStatuses}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ChannelStatusViewModel">
-                        <Border BorderBrush="#D5D9E0" BorderThickness="1" Padding="12" Margin="0,0,0,10">
-                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="150,120,110,110,130,120,*">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PortName}"/>
-                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding State}" FontWeight="SemiBold"/>
-                                <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding LastReadElapsed}"/>
-                                <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding LastTarget}"/>
-                                <TextBlock Grid.Row="0" Grid.Column="5" Text="{Binding LastSuccessTime}"/>
-                                <TextBlock Grid.Row="0" Grid.Column="6" Text="{Binding LastErrorTime}"/>
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" Margin="0,16,0,16">
+            <Border Grid.Column="0" Classes="stat-card" Margin="0,0,12,0">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Modbus requests" Classes="metric-label"/>
+                    <TextBlock Text="{Binding ModbusRequestCount}" Classes="metric-value"/>
+                </StackPanel>
+            </Border>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" Text="Requests" Opacity="0.7"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0" Text="{Binding RequestCount}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="2" Margin="0,8,0,0" Text="Errors" Opacity="0.7"/>
-                                <TextBlock Grid.Row="1" Grid.Column="3" Margin="0,8,0,0" Text="{Binding ErrorCount}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="5" Margin="0,8,0,0" Text="Last OK" Opacity="0.7"/>
-                                <TextBlock Grid.Row="1" Grid.Column="6" Margin="0,8,0,0" Text="Last Error" Opacity="0.7"/>
+            <Border Grid.Column="1" Classes="stat-card" Margin="0,0,12,0">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Modbus errors" Classes="metric-label"/>
+                    <TextBlock Text="{Binding ModbusErrorCount}" Classes="metric-value"/>
+                </StackPanel>
+            </Border>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="7" Margin="0,8,0,0"
-                                           Text="{Binding Message}" TextWrapping="Wrap" Opacity="0.75"/>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+            <Border Grid.Column="2" Classes="stat-card" Margin="0,0,12,0">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="PLC writes" Classes="metric-label"/>
+                    <TextBlock Text="{Binding PlcWriteCount}" Classes="metric-value"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="3" Classes="stat-card">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="PLC errors" Classes="metric-label"/>
+                    <TextBlock Text="{Binding PlcErrorCount}" Classes="metric-value"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Classes="panel" Padding="0">
+            <Grid RowDefinitions="Auto,*">
+                <Border Grid.Row="0" Background="#F8FAFC" CornerRadius="8,8,0,0" Padding="16,14">
+                    <Grid ColumnDefinitions="150,120,110,110,160,120,120">
+                        <TextBlock Grid.Column="0" Text="Worker" Classes="metric-label"/>
+                        <TextBlock Grid.Column="1" Text="Port" Classes="metric-label"/>
+                        <TextBlock Grid.Column="2" Text="State" Classes="metric-label"/>
+                        <TextBlock Grid.Column="3" Text="Elapsed" Classes="metric-label"/>
+                        <TextBlock Grid.Column="4" Text="Target" Classes="metric-label"/>
+                        <TextBlock Grid.Column="5" Text="Last OK" Classes="metric-label"/>
+                        <TextBlock Grid.Column="6" Text="Last Error" Classes="metric-label"/>
+                    </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="1" Padding="16">
+                    <ItemsControl ItemsSource="{Binding ChannelStatuses}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ChannelStatusViewModel">
+                                <Border Classes="worker-card" Background="{Binding CardBackground}">
+                                    <Border.Transitions>
+                                        <Transitions>
+                                            <BrushTransition Property="Background" Duration="0:0:0.18"/>
+                                        </Transitions>
+                                    </Border.Transitions>
+
+                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="150,120,110,110,160,120,120">
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" Foreground="#0F172A"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PortName}" Foreground="#334155"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding State}" FontWeight="SemiBold" Foreground="#0F766E"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding LastReadElapsed}" Foreground="#334155"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding LastTarget}" Foreground="#334155"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="5" Text="{Binding LastSuccessTime}" Foreground="#334155"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="6" Text="{Binding LastErrorTime}" Foreground="#334155"/>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                                            <TextBlock Text="Requests" Classes="metric-label"/>
+                                            <TextBlock Text="{Binding RequestCount}" Foreground="#0F172A"/>
+                                            <TextBlock Text="Errors" Classes="metric-label" Margin="12,0,0,0"/>
+                                            <TextBlock Text="{Binding ErrorCount}" Foreground="#0F172A"/>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="5" Margin="0,8,0,0"
+                                                   Text="{Binding Message}" TextWrapping="Wrap" Classes="muted"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

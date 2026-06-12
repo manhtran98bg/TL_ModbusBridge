@@ -16,7 +16,9 @@ namespace ModbusBridge.Services;
 
 public sealed class ModbusChannelWorker : IDisposable
 {
+    private static readonly TimeSpan CounterResetInterval = TimeSpan.FromHours(1);
     private readonly object _syncRoot = new();
+    private readonly object _counterResetSync = new();
     private readonly ModbusChannelSettings _channelSettings;
     private readonly ModbusSettings _modbusSettings;
     private readonly RegisterCache _registerCache;
@@ -29,6 +31,7 @@ public sealed class ModbusChannelWorker : IDisposable
     private WorkerStatus _status;
     private long _requestCount;
     private long _errorCount;
+    private long _counterWindowStartedAtTicks = DateTime.Now.Ticks;
     private long _lastReadElapsedTicks;
     private long _lastSuccessTimestampTicks;
     private long _lastErrorTimestampTicks;
@@ -409,6 +412,8 @@ public sealed class ModbusChannelWorker : IDisposable
 
     private WorkerStatus CreateStatus(WorkerState state, string message)
     {
+        ResetCountersIfWindowExpired(DateTime.Now);
+
         return new WorkerStatus
         {
             Kind = WorkerKind.Modbus,
@@ -430,6 +435,8 @@ public sealed class ModbusChannelWorker : IDisposable
 
     private void RegisterChannelRequest(ModbusReadBatch batch, bool success, TimeSpan elapsed)
     {
+        ResetCountersIfWindowExpired(DateTime.Now);
+
         Interlocked.Increment(ref _requestCount);
         Interlocked.Exchange(ref _lastReadElapsedTicks, elapsed.Ticks);
         _lastSlaveId = batch.SlaveId;
@@ -444,6 +451,28 @@ public sealed class ModbusChannelWorker : IDisposable
 
         Interlocked.Increment(ref _errorCount);
         Interlocked.Exchange(ref _lastErrorTimestampTicks, DateTime.Now.Ticks);
+    }
+
+    private void ResetCountersIfWindowExpired(DateTime now)
+    {
+        var windowStartedAtTicks = Interlocked.Read(ref _counterWindowStartedAtTicks);
+        if (now.Ticks - windowStartedAtTicks < CounterResetInterval.Ticks)
+        {
+            return;
+        }
+
+        lock (_counterResetSync)
+        {
+            windowStartedAtTicks = Interlocked.Read(ref _counterWindowStartedAtTicks);
+            if (now.Ticks - windowStartedAtTicks < CounterResetInterval.Ticks)
+            {
+                return;
+            }
+
+            Interlocked.Exchange(ref _requestCount, 0);
+            Interlocked.Exchange(ref _errorCount, 0);
+            Interlocked.Exchange(ref _counterWindowStartedAtTicks, now.Ticks);
+        }
     }
 
     private static DateTime CreateTimestamp(long ticks)
